@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Box,
-  FormControl,
-  InputLabel,
-  InputAdornment,
-  MenuItem,
   Paper,
-  Select,
   TextField,
   Typography,
   Table,
@@ -15,10 +10,6 @@ import {
   TableCell,
   TableBody,
   TableContainer,
-  Card,
-  CardContent,
-  Divider,
-  LinearProgress,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -28,90 +19,102 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 export default function History() {
   return (
     <Box sx={{ p: 3 }}>
-      <Box>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
         <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold" }}>
-          History
+          Reading History
         </Typography>
-      </Box>
-
-      {/* Filter Section */}
-      <Paper sx={{ p: 3, mt: 3, borderRadius: 2, border : '1px solid', }} variant="outlined">
-        <Typography variant="h6">Filter</Typography>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            justifyContent: "space-between",
-            alignItems: { xs: "stretch", md: "center" },
-            gap: 2,
-            mb: 2,
-            mt: 2,
-          }}
-        >
-          <TextField
-            variant="outlined"
-            placeholder="Search history..."
-            size="small"
-            sx={{
-              width: { xs: "100%", md: 250 },
-              minWidth: { xs: "100%", md: 250 },
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            label="Select Date"
+            enableAccessibleFieldDOMStructure={false}
+            slots={{ textField: TextField }}
+            slotProps={{
+              textField: {
+                size: "small",
+                fullWidth: true,
+              },
             }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
+            sx={{
+              width: { xs: "100%", sm: 200 },
             }}
           />
-
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              gap: 2,
-              width: { xs: "100%", md: "auto" },
-              
-            }}
-          >
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label="Select Date"
-                enableAccessibleFieldDOMStructure={false}
-                slots={{ textField: TextField }}
-                slotProps={{
-                  textField: {
-                    size: "small",
-                    fullWidth: true,
-                  },
-                }}
-                sx={{
-                  width: { xs: "100%", sm: 200 },
-                }}
-              />
-            </LocalizationProvider>
-
-            <FormControl
-              size="small"
-              sx={{
-                width: { xs: "100%", sm: 180 },
-              }}
-            >
-              <InputLabel>Sort</InputLabel>
-              <Select
-                label="Sort"
-                onChange={(e) => setSortOption(e.target.value)}
-              >
-                <MenuItem value="highToLow">High to Low</MenuItem>
-                <MenuItem value="lowToHigh">Low to High</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-        </Box>
-      </Paper>
+        </LocalizationProvider>
+      </Box>
 
       {/* History List */}
-      <Paper sx={{ p: 3, mt: 3, borderRadius: 2,height:400, border : '1px solid', }} variant="outlined">
+      <Paper
+        sx={{ p: 3, mt: 3, borderRadius: 2, border: "1px solid" }}
+        variant="outlined"
+      >
+        <TableContainer>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: "bold" }}>Date/Time</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>pH Level</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Turbidity</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>
+                  Temperature (°C)
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow>
+                <TableCell>Oct 21, 10:30 AM</TableCell>
+                <TableCell>7.2</TableCell>
+                <TableCell>0.5 NTU</TableCell>
+                <TableCell>25.3</TableCell>
+                <TableCell sx={{ color: "green", fontWeight: "bold" }}>
+                  Good
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Oct 22, 11:00 AM</TableCell>
+                <TableCell>7.1</TableCell>
+                <TableCell>0.6 NTU</TableCell>
+                <TableCell>25.8</TableCell>
+                <TableCell sx={{ color: "green", fontWeight: "bold" }}>
+                  Good
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Oct 23, 11:30 AM</TableCell>
+                <TableCell>7.3</TableCell>
+                <TableCell>1.2 NTU</TableCell>
+                <TableCell>26.1</TableCell>
+                <TableCell sx={{ color: "orange", fontWeight: "bold" }}>
+                  Fair
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Oct 24, 12:00 PM</TableCell>
+                <TableCell>6.9</TableCell>
+                <TableCell>2.1 NTU</TableCell>
+                <TableCell>26.5</TableCell>
+                <TableCell sx={{ color: "orange", fontWeight: "bold" }}>
+                  Fair
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Oct 25, 12:30 PM</TableCell>
+                <TableCell>7.0</TableCell>
+                <TableCell>0.8 NTU</TableCell>
+                <TableCell>25.9</TableCell>
+                <TableCell sx={{ color: "green", fontWeight: "bold" }}>
+                  Good
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Paper>
     </Box>
   );

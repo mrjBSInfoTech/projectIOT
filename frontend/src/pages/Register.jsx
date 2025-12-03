@@ -1,0 +1,474 @@
+import { useState } from "react";
+import axios from "axios";
+import {
+  TextField,
+  Button,
+  Container,
+  Typography,
+  Paper,
+  Box,
+  InputAdornment,
+  IconButton,
+  Link,
+  useTheme,
+  useMediaQuery,
+  MenuItem
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { 
+  WaterDrop as WaterDropIcon,
+  Visibility,
+  VisibilityOff,
+  Person as PersonIcon,
+  Lock as LockIcon,
+  Badge as BadgeIcon
+} from "@mui/icons-material";
+
+const Register = () => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const handleRegister = async () => {
+    if (!username || !password || !role) {
+      alert("Please fill in all fields");
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/register",
+        { username, password, role },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      alert(response.data.message);
+      navigate("/login");
+    } catch (error) {
+      alert(error.response?.data?.message || "Registration Failed");
+    }
+  };
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleClickShowConfirmPassword = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
+  return (
+    <Container
+      maxWidth={false}
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+        padding: "20px",
+        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        overflow:"hidden",
+      }}
+    >
+      <Paper
+        elevation={24}
+        style={{
+          backgroundColor: "white",
+          padding: isMobile ? "25px 20px" : "40px 35px", // Reduced padding
+          borderRadius: "20px", // Slightly smaller radius
+          width: "100%",
+          maxWidth: "450px", // Reduced max width
+          boxShadow: "0px 15px 40px rgba(0, 0, 0, 0.2)", // Reduced shadow
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Decorative water drop icon */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            mb: 2, // Reduced margin
+          }}
+        >
+          <WaterDropIcon
+            sx={{
+              fontSize: 50, // Smaller icon
+              color: "#5E60CE",
+              mb: 1.5, // Reduced margin
+            }}
+          />
+        </Box>
+
+        {/* Title */}
+        <Typography
+          variant="h4" // Changed from h3 to h4
+          align="center"
+          gutterBottom
+          sx={{
+            fontWeight: "800",
+            background: "linear-gradient(45deg, #5E60CE 30%, #7C7FED 90%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            mb: 0.5, // Reduced margin
+            fontSize: { xs: "1.8rem", sm: "2.2rem" }, // Smaller font
+          }}
+        >
+          HydroSmart
+        </Typography>
+
+        {/* Subtitle */}
+        <Typography
+          variant="subtitle1"
+          align="center"
+          gutterBottom
+          sx={{
+            color: "#666",
+            mb: 4, // Reduced margin
+            fontSize: { xs: "0.85rem", sm: "1rem" }, // Smaller font
+          }}
+        >
+          Smart Water Monitoring System
+        </Typography>
+
+        {/* Register Title */}
+        <Typography
+          variant="h6" // Changed from h5 to h6
+          align="center"
+          gutterBottom
+          sx={{
+            fontWeight: "600",
+            color: "#333",
+            mb: 3, // Reduced margin
+            fontSize: { xs: "1.2rem", sm: "1.4rem" }, // Smaller font
+          }}
+        >
+          Create an Account
+        </Typography>
+
+        <Box
+          component="form"
+          noValidate
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2.5, // Reduced gap
+          }}
+        >
+          {/* Username Field */}
+          <Box>
+            <Typography
+              variant="body1"
+              sx={{
+                fontWeight: "600",
+                color: "#444",
+                mb: 0.75, // Reduced margin
+                ml: 0.5,
+                fontSize: "0.95rem", // Smaller font
+              }}
+            >
+              Username
+            </Typography>
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              size="small" // Added small size
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonIcon sx={{ color: "#5E60CE", fontSize: "1.25rem" }} /> {/* Smaller icon */}
+                  </InputAdornment>
+                ),
+                sx: {
+                  borderRadius: "10px", // Smaller radius
+                  backgroundColor: "#f8f9fa",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#e0e0e0",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#5E60CE",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#5E60CE",
+                    borderWidth: "2px",
+                  },
+                  fontSize: "0.95rem", // Smaller text
+                },
+              }}
+            />
+          </Box>
+
+          {/* Password Field */}
+          <Box>
+            <Typography
+              variant="body1"
+              sx={{
+                fontWeight: "600",
+                color: "#444",
+                mb: 0.75, // Reduced margin
+                ml: 0.5,
+                fontSize: "0.95rem", // Smaller font
+              }}
+            >
+              Password
+            </Typography>
+            <TextField
+              fullWidth
+              type={showPassword ? "text" : "password"}
+              variant="outlined"
+              placeholder="Create a password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              size="small" // Added small size
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon sx={{ color: "#5E60CE", fontSize: "1.25rem" }} /> {/* Smaller icon */}
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      edge="end"
+                      sx={{ color: "#666", padding: "6px" }} // Smaller padding
+                      size="small"
+                    >
+                      {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />} {/* Smaller icons */}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                sx: {
+                  borderRadius: "10px", // Smaller radius
+                  backgroundColor: "#f8f9fa",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#e0e0e0",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#5E60CE",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#5E60CE",
+                    borderWidth: "2px",
+                  },
+                  fontSize: "0.95rem", // Smaller text
+                },
+              }}
+            />
+          </Box>
+
+          {/* Confirm Password Field */}
+          <Box>
+            <Typography
+              variant="body1"
+              sx={{
+                fontWeight: "600",
+                color: "#444",
+                mb: 0.75, // Reduced margin
+                ml: 0.5,
+                fontSize: "0.95rem", // Smaller font
+              }}
+            >
+              Confirm Password
+            </Typography>
+            <TextField
+              fullWidth
+              type={showConfirmPassword ? "text" : "password"}
+              variant="outlined"
+              placeholder="Confirm your password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              size="small" // Added small size
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon sx={{ color: "#5E60CE", fontSize: "1.25rem" }} /> {/* Smaller icon */}
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowConfirmPassword}
+                      edge="end"
+                      sx={{ color: "#666", padding: "6px" }} // Smaller padding
+                      size="small"
+                    >
+                      {showConfirmPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />} {/* Smaller icons */}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                sx: {
+                  borderRadius: "10px", // Smaller radius
+                  backgroundColor: "#f8f9fa",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#e0e0e0",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#5E60CE",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#5E60CE",
+                    borderWidth: "2px",
+                  },
+                  fontSize: "0.95rem", // Smaller text
+                },
+              }}
+            />
+          </Box>
+
+          {/* Role Selection */}
+          <Box>
+            <Typography
+              variant="body1"
+              sx={{
+                fontWeight: "600",
+                color: "#444",
+                mb: 0.75, // Reduced margin
+                ml: 0.5,
+                fontSize: "0.95rem", // Smaller font
+              }}
+            >
+              Role
+            </Typography>
+            <TextField
+              select
+              fullWidth
+              variant="outlined"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              size="small" // Added small size
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <BadgeIcon sx={{ color: "#5E60CE", fontSize: "1.25rem", ml: 0.5 }} /> {/* Smaller icon */}
+                  </InputAdornment>
+                ),
+                sx: {
+                  borderRadius: "10px", // Smaller radius
+                  backgroundColor: "#f8f9fa",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#e0e0e0",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#5E60CE",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#5E60CE",
+                    borderWidth: "2px",
+                  },
+                  fontSize: "0.95rem", // Smaller text
+                },
+              }}
+            >
+              <MenuItem value="">
+                <em>Select a role</em>
+              </MenuItem>
+              <MenuItem value="admin">Administrator</MenuItem>
+              <MenuItem value="user">Regular User</MenuItem>
+              <MenuItem value="viewer">Viewer</MenuItem>
+              <MenuItem value="operator">Operator</MenuItem>
+            </TextField>
+          </Box>
+
+          {/* Register Button */}
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={() => navigate("/")}
+            sx={{
+              height: "48px", // Reduced height
+              fontWeight: "700",
+              textTransform: "none",
+              fontSize: "16px", // Smaller font
+              backgroundColor: "#5E60CE",
+              borderRadius: "10px", // Smaller radius
+              mt: 1.5, // Reduced margin
+              "&:hover": {
+                backgroundColor: "#4a4db4",
+                transform: "translateY(-1px)", // Reduced lift
+                boxShadow: "0px 8px 15px rgba(94, 96, 206, 0.2)", // Reduced shadow
+              },
+              transition: "all 0.2s ease",
+              boxShadow: "0px 4px 10px rgba(94, 96, 206, 0.15)", // Reduced shadow
+            }}
+          >
+            Register
+          </Button>
+
+          {/* Login Link */}
+          <Typography
+            variant="body2"
+            align="center"
+            sx={{
+              mt: 2.5, // Reduced margin
+              color: "#666",
+              fontSize: "0.9rem", // Smaller font
+            }}
+          >
+            Already have an account?{" "}
+            <Link
+              component="button"
+              variant="body2"
+              onClick={() => navigate("/")}
+              sx={{
+                fontWeight: "600",
+                color: "#5E60CE",
+                textDecoration: "none",
+                fontSize: "0.9rem", // Smaller font
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              Login
+            </Link>
+          </Typography>
+        </Box>
+
+        {/* Decorative elements - made smaller */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            width: "80px", // Smaller
+            height: "80px", // Smaller
+            background: "linear-gradient(45deg, #5E60CE20 30%, #7C7FED20 90%)",
+            borderRadius: "0 0 0 100%",
+            zIndex: 0,
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            width: "60px", // Smaller
+            height: "60px", // Smaller
+            background: "linear-gradient(45deg, #7C7FED20 30%, #5E60CE20 90%)",
+            borderRadius: "0 100% 0 0",
+            zIndex: 0,
+          }}
+        />
+      </Paper>
+    </Container>
+  );
+};
+
+export default Register;

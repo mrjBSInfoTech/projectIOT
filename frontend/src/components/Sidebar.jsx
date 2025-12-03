@@ -10,7 +10,7 @@ import { modalStyles } from "../theme/modalTheme";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Stack, Avatar, Typography, IconButton } from "@mui/material";
 import { ThemeProvider, CssBaseline, useMediaQuery } from "@mui/material";
-import { lightTheme, darkTheme } from "../theme/customTheme";
+import { createTheme } from "@mui/material/styles";
 
 //Icons
 import BubbleChartIcon from "@mui/icons-material/BubbleChart";
@@ -19,10 +19,44 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import HistoryIcon from "@mui/icons-material/History";
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
 import FolderIcon from "@mui/icons-material/Folder";
 import PlayLessonIcon from "@mui/icons-material/PlayLesson";
 import ThermostatIcon from "@mui/icons-material/Thermostat";
 import WaterDropIcon from "@mui/icons-material/WaterDrop";
+
+export const lightTheme = createTheme({
+  palette: {
+    primary: {
+      main: "#5E60CE",
+    },
+    background: {
+      default: "#f8f9fa", // Light gray background for light mode
+      paper: "#FFFFFF",
+      sidebar: "#5E60CE",
+    },
+    text: {
+      primary: "#FFFFFF",
+    },
+  },
+});
+
+export const darkTheme = createTheme({
+  palette: {
+    primary: {
+      main: "#7C7FED",
+    },
+    background: {
+      default: "#0F172A", // Dark background for dark mode
+      paper: "#1e293b", // Slightly lighter than default for paper
+      sidebar: "#4C1D95",
+    },
+    text: {
+      primary: "#FFFFFF",
+    },
+  },
+});
 
 export default function DashboardLayout({ children }) {
   const navigate = useNavigate();
@@ -44,70 +78,36 @@ export default function DashboardLayout({ children }) {
   // Sidebar menu items
   const navigation = [
     {
-      segment: "guides",
-      title: "Basic Information",
-      icon: <FolderIcon />,
-      children: [
-        {
-          segment: "phLevel",
-          title: "PH Level",
-          icon: <WaterDropIcon />,
-        },
-        {
-          segment: "temperature",
-          title: "Temparature",
-          icon: <ThermostatIcon />,
-        },
-        {
-          segment: "conductivity",
-          title: "Conductivity",
-          icon: <ElectricBoltIcon />,
-        },
-        {
-          segment: "turbidity",
-          title: "Turbidity",
-          icon: <BubbleChartIcon />,
-        },
-        {
-          segment: "healthInfo",
-          title: "Health Information",
-          icon: <BubbleChartIcon />,
-        },
-        {
-          segment: "waterInfo",
-          title: "Water Information",
-          icon: <BubbleChartIcon />,
-        },
-        {
-          segment: "about",
-          title: "About",
-          icon: <BubbleChartIcon />,
-        },
-      ],
+      segment: "guide",
+      title: "Guide",
+      icon: <MenuBookIcon />,
+      pattern: "/dashboard",
     },
+    { kind: 'divider' },
     {
       segment: "dashboard",
       title: "Dashboard",
       icon: <DashboardIcon />,
       pattern: "/dashboard",
     },
-
+    { kind: 'divider' },
     {
       segment: "history",
       title: "History",
       icon: <HistoryIcon />,
       pattern: "/history",
     },
+    { kind: 'divider' },
     {
       segment: "about",
       title: "About",
-      icon: <BubbleChartIcon />,
+      icon: <InfoOutlineIcon />,
     },
   ];
 
   const branding = {
     logo: <WaterDropIcon sx={{ fontSize: 30 }} color="primary" />,
-    title: "",
+    title: "HydroSmart",
     homeUrl: "/guide",
   };
 
@@ -135,10 +135,10 @@ export default function DashboardLayout({ children }) {
         {!mini && (
           <Stack direction="column">
             <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              John Doe
+              Christian Beltran
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              jd@example.com
+              cb@example.com
             </Typography>
           </Stack>
         )}
@@ -232,7 +232,15 @@ export default function DashboardLayout({ children }) {
             },
           }}
         >
-          <div style={{ padding: "20px" }}>{children}</div>
+          <Box
+            sx={{
+              padding: "20px",
+              backgroundColor: "background.default", // Uses theme's background color
+              minHeight: "100vh",
+            }}
+          >
+            {children}
+          </Box>
         </MuiDashboardLayout>
       </AppProvider>
     </ThemeProvider>

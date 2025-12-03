@@ -14,6 +14,8 @@ import HealthInfo from "./pages/HealthInfo";
 import WaterInfo from "./pages/WaterInfo";
 import theme from './theme/fontTheme';
 import Welcome from "./Welcome";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
 function App() {
   return (
@@ -23,8 +25,8 @@ function App() {
       <Router>
         <Routes>
           {/* First Page */}
-          <Route path="/" element={<Welcome />} />
-
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           {/* Dashboard Pages */}
           <Route
             path="/guide"

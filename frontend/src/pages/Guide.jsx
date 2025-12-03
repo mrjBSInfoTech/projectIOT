@@ -13,179 +13,211 @@ import {
   Menu,
   MenuItem,
   Paper,
+  useTheme,
 } from "@mui/material";
 
 export default function Guide() {
+  const theme = useTheme();
   return (
     <Box sx={{ p: 3 }}>
       <Box>
         <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold" }}>
-          Guide
+          User Guide
         </Typography>
       </Box>
       <Box
         sx={{
           mt: 3,
-          display: "flex",
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
           gap: 3,
-          flexWrap: "wrap",
-          justifyContent: "center",
+          maxWidth: "1400px",
+          margin: "0 auto",
         }}
       >
         <Card
           variant="outlined"
           sx={{
-            flex: "1 1 250px",
-            maxWidth: 350,
-            height: 200,
-            padding: 2,
+            p: 3,
             borderRadius: 2,
             border: "1px solid",
-            bgcolor: "error.main",
-            color: "white",
+            borderColor: "divider",
+            bgcolor: "background.paper",
+            flex: "1 1 1000px",
+            maxWidth: 1200,
             transition: "transform 0.2s ease, box-shadow 0.2s ease",
             "&:hover": {
               transform: "translateY(-4px)",
-              boxShadow: (theme) => theme.shadows[1],
+              boxShadow: (theme) => theme.shadows[2],
             },
           }}
         >
-          <CardContent>
-            <Typography gutterBottom variant="h5" sx={{ fontWeight: "bold" }}>
-              PH Level
-            </Typography>
-          </CardContent>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+            <Paper
+              sx={{
+                p: 1.5,
+                bgcolor:"secondary.main",
+                color: "indigo",
+                borderRadius: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minWidth: 50,
+                height: 50,
+                fontWeight: "bold",
+                fontSize: 20,
+              }}
+            >
+              1
+            </Paper>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
+                Installation
+              </Typography>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                Connect the sensor probe to the main unit and submerge in water source.
+              </Typography>
+            </Box>
+          </Box>
         </Card>
 
         <Card
           variant="outlined"
           sx={{
-            flex: "1 1 250px",
-            maxWidth: 350,
-            height: 200,
-            padding: 2,
+            p: 3,
             borderRadius: 2,
             border: "1px solid",
-            bgcolor: "success.main",
-            color: "white",
+            borderColor: "divider",
+            bgcolor: "background.paper",
+            flex: "1 1 1000px",
+            maxWidth: 1200,
             transition: "transform 0.2s ease, box-shadow 0.2s ease",
             "&:hover": {
               transform: "translateY(-4px)",
-              boxShadow: (theme) => theme.shadows[1],
+              boxShadow: (theme) => theme.shadows[2],
             },
           }}
         >
-          <CardContent>
-            <Typography gutterBottom variant="h5" sx={{ fontWeight: "bold" }}>
-              Temperature
-            </Typography>
-          </CardContent>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+            <Paper
+              sx={{
+                p: 1.5,
+                bgcolor:"secondary.main",
+                color: "indigo",
+                borderRadius: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minWidth: 50,
+                height: 50,
+                fontWeight: "bold",
+                fontSize: 20,
+              }}
+            >
+              2
+            </Paper>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
+                Calibration
+              </Typography>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                Use the calibration button to zero the sensors before first use.
+              </Typography>
+            </Box>
+          </Box>
         </Card>
 
         <Card
           variant="outlined"
           sx={{
-            flex: "1 1 250px",
-            maxWidth: 350,
-            height: 200,
-            padding: 2,
+            p: 3,
             borderRadius: 2,
             border: "1px solid",
-            bgcolor: "secondary.main",
-            color: "white",
+            borderColor: "divider",
+            bgcolor: "background.paper",
+            flex: "1 1 1000px",
+            maxWidth: 1200,
             transition: "transform 0.2s ease, box-shadow 0.2s ease",
             "&:hover": {
               transform: "translateY(-4px)",
-              boxShadow: (theme) => theme.shadows[1],
+              boxShadow: (theme) => theme.shadows[2],
             },
           }}
         >
-          <CardContent>
-            <Typography gutterBottom variant="h5" sx={{ fontWeight: "bold" }}>
-              Conductivity
-            </Typography>
-          </CardContent>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+            <Paper
+              sx={{
+                p: 1.5,
+                bgcolor:"secondary.main",
+                color: "indigo",
+                borderRadius: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minWidth: 50,
+                height: 50,
+                fontWeight: "bold",
+                fontSize: 20,
+              }}
+            >
+              3
+            </Paper>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
+                Monitoring
+              </Typography>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                Watch real-time data on the dashboard. Green indicators mean safe levels.
+              </Typography>
+            </Box>
+          </Box>
         </Card>
+
         <Card
           variant="outlined"
           sx={{
-            flex: "1 1 250px",
-            maxWidth: 350,
-            height: 200,
-            padding: 2,
+            p: 3,
             borderRadius: 2,
             border: "1px solid",
-            bgcolor: "primary.main",
-            color: "white",
+            borderColor: "divider",
+            bgcolor: "background.paper",
+            flex: "1 1 1000px",
+            maxWidth: 1200,
             transition: "transform 0.2s ease, box-shadow 0.2s ease",
             "&:hover": {
               transform: "translateY(-4px)",
-              boxShadow: (theme) => theme.shadows[1],
+              boxShadow: (theme) => theme.shadows[2],
             },
           }}
         >
-          <CardContent>
-            <Typography gutterBottom variant="h5" sx={{ fontWeight: "bold" }}>
-              Turbidity
-            </Typography>
-          </CardContent>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+            <Paper
+              sx={{
+                p: 1.5,
+                bgcolor:"secondary.main",
+                color: "indigo",
+                borderRadius: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minWidth: 50,
+                height: 50,
+                fontWeight: "bold",
+                fontSize: 20,
+              }}
+            >
+              4
+            </Paper>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
+                Filtration
+              </Typography>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                The system automatically engages filters when turbidity exceeds 2.0 NTU.
+              </Typography>
+            </Box>
+          </Box>
         </Card>
-      </Box>
-      <Paper
-        sx={{
-          p: 3,
-          mt: 3,
-          borderRadius: 2,
-          border: "1px solid",
-          bgcolor: "success.light",
-          color: "white",
-          transition: "transform 0.2s ease, box-shadow 0.2s ease",
-          "&:hover": {
-            transform: "translateY(-4px)",
-            boxShadow: (theme) => theme.shadows[1],
-          },
-        }}
-        variant="outlined"
-      >
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          Health Information
-        </Typography>
-      </Paper>
-      <Paper
-        sx={{
-          p: 3,
-          mt: 3,
-          borderRadius: 2,
-          border: "1px solid",
-          bgcolor: "success.light",
-          color: "white",
-          transition: "transform 0.2s ease, box-shadow 0.2s ease",
-          "&:hover": {
-            transform: "translateY(-4px)",
-            boxShadow: (theme) => theme.shadows[1],
-          },
-        }}
-        variant="outlined"
-      >
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          Water Information
-        </Typography>
-      </Paper>
-      <Box
-        sx={{ mt: 3, textAlign: { xs: "center", sm: "right", md: "right" } }}
-      >
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{
-            width: { xs: "100%", md: 150 },
-            fontSize: "1.1rem",
-            padding: "10px 20px",
-            fontWeight: "bold",
-          }}
-        >
-          Start
-        </Button>
       </Box>
     </Box>
   );
