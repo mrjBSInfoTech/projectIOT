@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState, useEffect } from "react";
 import { AppProvider } from "@toolpad/core";
 import Backdrop from "@mui/material/Backdrop";
 import Button from "@mui/material/Button";
@@ -19,8 +20,8 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import HistoryIcon from "@mui/icons-material/History";
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 import FolderIcon from "@mui/icons-material/Folder";
 import PlayLessonIcon from "@mui/icons-material/PlayLesson";
 import ThermostatIcon from "@mui/icons-material/Thermostat";
@@ -61,9 +62,25 @@ export const darkTheme = createTheme({
 export default function DashboardLayout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [user, setUser] = useState("");
+  const [role, setRole] = useState("");
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("username");
+    const storedRole = localStorage.getItem("role");
+    setRole(storedRole || "user");
+    setUser(storedUser);
+
+    console.log(`Role from localStorage: ${storedRole}`);
+    console.log("All localStorage items:", {
+      token: localStorage.getItem("token"),
+      username: localStorage.getItem("username"),
+      role: localStorage.getItem("role"),
+    });
+  }, []);
 
   // Simulated router (for Toolpad)
   const router = {
@@ -71,8 +88,19 @@ export default function DashboardLayout({ children }) {
     navigate: (path) => navigate(path),
   };
 
-  const handleEnter = () => {
-    navigate("/"); // redirect to your Dashboard page
+  const handleLogout = () => {
+    // Clear all stored data
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
+
+    navigate("/", { replace: true }); // redirect to your Dashboard page
+
+    // Clear browser history for extra security
+    window.history.pushState(null, null, window.location.href);
+    window.onpopstate = function () {
+      window.history.pushState(null, null, window.location.href);
+    };
   };
 
   // Sidebar menu items
@@ -83,21 +111,49 @@ export default function DashboardLayout({ children }) {
       icon: <MenuBookIcon />,
       pattern: "/dashboard",
     },
-    { kind: 'divider' },
+    { kind: "divider" },
+    {
+      segment: "guides",
+      title: "Guides",
+      icon: <MenuBookIcon />,
+      children: [
+        {
+          segment: "phLevel",
+          title: "PH Level",
+          icon: <WaterDropIcon />,
+        },
+        {
+          segment: "turbidity",
+          title: "Turbidity",
+          icon: <BubbleChartIcon />,
+        },
+        {
+          segment: "temperature",
+          title: "Temperature",
+          icon: <ThermostatIcon />,
+        },
+        {
+          segment: "conductivity",
+          title: "Conductivity",
+          icon: <ElectricBoltIcon />,
+        },
+      ],
+    },
+    { kind: "divider" },
     {
       segment: "dashboard",
       title: "Dashboard",
       icon: <DashboardIcon />,
       pattern: "/dashboard",
     },
-    { kind: 'divider' },
+    { kind: "divider" },
     {
       segment: "history",
       title: "History",
       icon: <HistoryIcon />,
       pattern: "/history",
     },
-    { kind: 'divider' },
+    { kind: "divider" },
     {
       segment: "about",
       title: "About",
@@ -135,10 +191,7 @@ export default function DashboardLayout({ children }) {
         {!mini && (
           <Stack direction="column">
             <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              Christian Beltran
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              cb@example.com
+              User: {user}
             </Typography>
           </Stack>
         )}
@@ -161,12 +214,6 @@ export default function DashboardLayout({ children }) {
         navigation={navigation}
         branding={branding}
         router={router}
-        session={{
-          user: {
-            name: "Rob Justin",
-            email: "rob@example.com",
-          },
-        }}
       >
         <Modal
           aria-labelledby="transition-modal-title"
@@ -209,7 +256,7 @@ export default function DashboardLayout({ children }) {
                   Cancel
                 </Button>
                 <Button
-                  onClick={handleEnter}
+                  onClick={handleLogout}
                   variant="contained"
                   color="primary"
                 >

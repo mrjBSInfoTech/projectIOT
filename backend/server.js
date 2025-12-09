@@ -2,13 +2,11 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { fileURLToPath } from 'url';
-import categoryRoutes from "./routes/category.js";
-import supplierRoutes from "./routes/supplier.js";
-import productRoutes from "./routes/product.js";
-import purchaseRoutes from "./routes/purchase.js";
-import salesRoutes from "./routes/sales.js";
-import historyRoutes from "./routes/history.js";
+import authRoutes from "./routes/auth.js";
+import db from "./database/db.js";
 
 dotenv.config();
 
@@ -26,16 +24,11 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Root route (just to test if server runs)
 app.get("/", (req, res) => {
-  res.send("Product Management API is running ✅");
+  res.send("Project IOT API is running ✅");
 });
 
 // Routes
-app.use("/api/categories", categoryRoutes);
-app.use("/api/supplier", supplierRoutes);
-app.use("/api/product", productRoutes);
-app.use("/api/purchases", purchaseRoutes);
-app.use("/api/sales", salesRoutes);
-app.use("/api/history", historyRoutes);
+app.use("/api/auth", authRoutes);
 
 // Handle 404 (unknown routes)
 app.use((req, res) => {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import {
   TextField,
@@ -7,22 +7,31 @@ import {
   Typography,
   Paper,
   Box,
+  Snackbar,
+  Alert,
+  Slide,
   InputAdornment,
   IconButton,
   Link,
   useTheme,
   useMediaQuery,
-  MenuItem
+  MenuItem,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { 
+import {
   WaterDrop as WaterDropIcon,
   Visibility,
   VisibilityOff,
   Person as PersonIcon,
   Lock as LockIcon,
-  Badge as BadgeIcon
+  Badge as BadgeIcon,
 } from "@mui/icons-material";
+import { registerUser } from "../api/authAPI";
+
+// Slide Transition for Snackbar
+function SlideTransition(props) {
+  return <Slide {...props} direction="up" />;
+}
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -31,32 +40,79 @@ const Register = () => {
   const [role, setRole] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Handle Enter key register
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        handleRegister();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [username, password, confirmPassword]);
+
+  // Snackbar handlers
+  const showSnackbar = (message) => {
+    setSnackbarMessage(message);
+    setSnackbarOpen(true);
+  };
+
+  const closeSnackbar = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbarOpen(false);
+  };
+
   const handleRegister = async () => {
-    if (!username || !password || !role) {
-      alert("Please fill in all fields");
+    if (!username || !password || !confirmPassword) {
+      showSnackbar("❌ Please fill in all fields");
       return;
     }
-    
+
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      showSnackbar("❌ Passwords do not match");
+      return;
+    }
+
+    if (password.length < 6) {
+      showSnackbar("❌ Password must be at least 6 characters");
       return;
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/register",
-        { username, password, role },
-        { headers: { "Content-Type": "application/json" } }
-      );
+      const response = await registerUser({ username, password, role });
 
-      alert(response.data.message);
-      navigate("/login");
+      console.log("Register response:", response);
+
+      showSnackbar("✅ Registration Successful!");
+
+      // Clear form
+      setUsername("");
+      setPassword("");
+      setConfirmPassword("");
+      setRole("");
+
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
     } catch (error) {
-      alert(error.response?.data?.message || "Registration Failed");
+      console.error("Register error:", error);
+
+      // Extract error message from different possible locations
+      const errorMessage =
+        error.response?.data?.message || error.message || "Registration failed";
+
+      showSnackbar(`❌ ${errorMessage}`);
     }
   };
 
@@ -75,10 +131,10 @@ const Register = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        minHeight: "100vh",
+        minHeight: "99vh",
         padding: "20px",
         background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        overflow:"hidden",
+        overflow: "hidden",
       }}
     >
       <Paper
@@ -190,7 +246,10 @@ const Register = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <PersonIcon sx={{ color: "#5E60CE", fontSize: "1.25rem" }} /> {/* Smaller icon */}
+                    <PersonIcon
+                      sx={{ color: "#5E60CE", fontSize: "1.25rem" }}
+                    />{" "}
+                    {/* Smaller icon */}
                   </InputAdornment>
                 ),
                 sx: {
@@ -237,7 +296,8 @@ const Register = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <LockIcon sx={{ color: "#5E60CE", fontSize: "1.25rem" }} /> {/* Smaller icon */}
+                    <LockIcon sx={{ color: "#5E60CE", fontSize: "1.25rem" }} />{" "}
+                    {/* Smaller icon */}
                   </InputAdornment>
                 ),
                 endAdornment: (
@@ -249,7 +309,12 @@ const Register = () => {
                       sx={{ color: "#666", padding: "6px" }} // Smaller padding
                       size="small"
                     >
-                      {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />} {/* Smaller icons */}
+                      {showPassword ? (
+                        <VisibilityOff fontSize="small" />
+                      ) : (
+                        <Visibility fontSize="small" />
+                      )}{" "}
+                      {/* Smaller icons */}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -297,7 +362,8 @@ const Register = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <LockIcon sx={{ color: "#5E60CE", fontSize: "1.25rem" }} /> {/* Smaller icon */}
+                    <LockIcon sx={{ color: "#5E60CE", fontSize: "1.25rem" }} />{" "}
+                    {/* Smaller icon */}
                   </InputAdornment>
                 ),
                 endAdornment: (
@@ -309,7 +375,12 @@ const Register = () => {
                       sx={{ color: "#666", padding: "6px" }} // Smaller padding
                       size="small"
                     >
-                      {showConfirmPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />} {/* Smaller icons */}
+                      {showConfirmPassword ? (
+                        <VisibilityOff fontSize="small" />
+                      ) : (
+                        <Visibility fontSize="small" />
+                      )}{" "}
+                      {/* Smaller icons */}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -331,17 +402,17 @@ const Register = () => {
               }}
             />
           </Box>
-
           {/* Role Selection */}
+          {/* 
           <Box>
             <Typography
               variant="body1"
               sx={{
                 fontWeight: "600",
                 color: "#444",
-                mb: 0.75, // Reduced margin
+                mb: 0.75,
                 ml: 0.5,
-                fontSize: "0.95rem", // Smaller font
+                fontSize: "0.95rem",
               }}
             >
               Role
@@ -351,16 +422,19 @@ const Register = () => {
               fullWidth
               variant="outlined"
               value={role}
+              placeholder="Select your role"
               onChange={(e) => setRole(e.target.value)}
-              size="small" // Added small size
+              size="small"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <BadgeIcon sx={{ color: "#5E60CE", fontSize: "1.25rem", ml: 0.5 }} /> {/* Smaller icon */}
+                    <BadgeIcon
+                      sx={{ color: "#5E60CE", fontSize: "1.25rem", ml: 0.5 }}
+                    />
                   </InputAdornment>
                 ),
                 sx: {
-                  borderRadius: "10px", // Smaller radius
+                  borderRadius: "10px",
                   backgroundColor: "#f8f9fa",
                   "& .MuiOutlinedInput-notchedOutline": {
                     borderColor: "#e0e0e0",
@@ -372,7 +446,7 @@ const Register = () => {
                     borderColor: "#5E60CE",
                     borderWidth: "2px",
                   },
-                  fontSize: "0.95rem", // Smaller text
+                  fontSize: "0.95rem",
                 },
               }}
             >
@@ -380,17 +454,16 @@ const Register = () => {
                 <em>Select a role</em>
               </MenuItem>
               <MenuItem value="admin">Administrator</MenuItem>
-              <MenuItem value="user">Regular User</MenuItem>
-              <MenuItem value="viewer">Viewer</MenuItem>
-              <MenuItem value="operator">Operator</MenuItem>
+              <MenuItem value="user">User</MenuItem>
             </TextField>
           </Box>
+          */}
 
           {/* Register Button */}
           <Button
             variant="contained"
             fullWidth
-            onClick={() => navigate("/")}
+            onClick={handleRegister}
             sx={{
               height: "48px", // Reduced height
               fontWeight: "700",
@@ -467,6 +540,21 @@ const Register = () => {
           }}
         />
       </Paper>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={closeSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        TransitionComponent={SlideTransition}
+      >
+        <Alert
+          onClose={closeSnackbar}
+          severity={snackbarMessage.includes("❌") ? "error" : "success"}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

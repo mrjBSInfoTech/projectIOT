@@ -232,15 +232,25 @@ export default function Dashboard() {
     </Box>
     {/* Add your chart/content here */}
     <Box sx={{ 
-      height: { xs: 300, md: 400 }, 
+      height: { xs: "auto", sm: 250, md: 350 }, 
+      minHeight: { xs: 250, sm: 250, md: 350 },
       display: "flex", 
       alignItems: "center", 
       justifyContent: "center",
-      bgcolor: "background.paper",
+      bgcolor: "gray",
       borderRadius: 3,
-      p: 2
+      p: { xs: 1.5, sm: 2 },
+      width: "100%",
+      overflow: "hidden",
+      boxSizing: "border-box"
     }}>
-      <Typography color="text.secondary">
+      <Typography 
+        color="text.secondary"
+        sx={{
+          fontSize: { xs: "0.875rem", sm: "1rem" },
+          textAlign: "center"
+        }}
+      >
         Chart/Graph Area
       </Typography>
     </Box>

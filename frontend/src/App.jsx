@@ -1,5 +1,7 @@
-import React from "react";
+import * as React from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ProtectedRoute } from "./ProtectedRoute";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import Sidebar from "./components/Sidebar";
 import About from "./pages/About";

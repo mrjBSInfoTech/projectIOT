@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import {
   TextField,
@@ -7,11 +7,14 @@ import {
   Typography,
   Paper,
   Box,
+  Snackbar,
+  Alert,
+  Slide,
   InputAdornment,
   IconButton,
   Link,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -21,45 +24,77 @@ import {
   Person as PersonIcon,
   Lock as LockIcon
 } from "@mui/icons-material";
+import { loginUser } from "../api/authAPI";
+
+// Slide Transition for Snackbar
+function SlideTransition(props) {
+  return <Slide {...props} direction="up" />;
+}
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Check if user is already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      // User is already logged in, redirect to dashboard
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
+
+  // Handle Enter key login
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        handleLogin();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [username, password]);
+
+  // Snackbar handlers
+  const showSnackbar = (message) => {
+    setSnackbarMessage(message);
+    setSnackbarOpen(true);
+  };
+
+  const closeSnackbar = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbarOpen(false);
+  };
+
   const handleLogin = async () => {
     if (!username || !password) {
-      alert("Please fill in all fields");
+      showSnackbar("❌ Please fill in all fields");
       return;
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/login",
-        { username, password },
-        { headers: { "Content-Type": "application/json" } }
-      );
+      const data = await loginUser({ username, password });
 
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("username", response.data.username);
-      localStorage.setItem("role", response.data.role);
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("username", data.username);
+      localStorage.setItem("role", data.role);
 
-      // Check if it's the user's first time logging in
-      const hasVisitedWelcome = localStorage.getItem(`hasVisitedWelcome_${response.data.username}`);
-      
-      alert("Login successful!");
-      
-      // Redirect to Welcome page if first time, otherwise to Dashboard
-      if (!hasVisitedWelcome) {
-        navigate("/welcome");
-      } else {
-        navigate("/dashboard");
-      }
+      showSnackbar("✅ Login successful!");
+
+      navigate("/dashboard");
     } catch (error) {
-      alert(error.response?.data?.message || "Invalid credentials");
+      showSnackbar(`❌ Login failed: ${error.message}`);
     }
   };
 
@@ -275,7 +310,7 @@ const Login = () => {
           <Button
             variant="contained"
             fullWidth
-            onClick={() => navigate("/guide")}
+            onClick={handleLogin}
             sx={{
               height: "48px", // Reduced height
               fontWeight: "700",
@@ -294,7 +329,7 @@ const Login = () => {
             }}
           >
             Login
-          </Button>
+          </Button> 
 
           {/* Sign Up Link */}
           <Typography
@@ -352,6 +387,21 @@ const Login = () => {
           }}
         />
       </Paper>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={closeSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        TransitionComponent={SlideTransition}
+      >
+        <Alert
+          onClose={closeSnackbar}
+          severity={snackbarMessage.includes("❌") ? "error" : "success"}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
