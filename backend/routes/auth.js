@@ -7,7 +7,7 @@ const router = express.Router();
 
 // REGISTER
 router.post("/register", (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, role } = req.body;
 
   if (!username || !password) {
     return res.status(400).json({ message: "All fields are required" });
@@ -15,9 +15,9 @@ router.post("/register", (req, res) => {
 
   const hashedPassword = bcrypt.hashSync(password, 10);
 
-  const sql = "INSERT INTO users (username, password) VALUES (?, ?)";
+  const sql = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
 
-  db.query(sql, [username, hashedPassword], (err) => {
+  db.query(sql, [username, hashedPassword, role || "user"], (err) => {
     if (err) {
       if (err.code === "ER_DUP_ENTRY") {
         return res.status(409).json({ message: "Username already exists" });
@@ -50,12 +50,12 @@ router.post("/login", (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user.id, username: user.username },
-      process.env.JWT_SECRET,
+      { id: user.id, username: user.username, role: user.role || "User" },
+      process.env.JWT_SECRET || "your_secret_key",
       { expiresIn: "1d" }
     );
 
-    res.json({ token, username: user.username, role: user.role || "user" });
+    res.json({ token, username: user.username, role: user.role || "User" });
   });
 });
 

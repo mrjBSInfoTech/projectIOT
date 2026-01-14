@@ -27,52 +27,283 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { IconButton, Tooltip } from "@mui/material";
-import { Edit, Delete } from "@mui/icons-material";
-import SearchIcon from "@mui/icons-material/Search";
+import * as XLSX from "xlsx";
+import dayjs from "dayjs";
+import { getIotData } from "../api/iotAPI";
+import { saveHistory } from "../api/historyAPI";
+import { getHistory } from "../api/historyAPI";
+import Export from "../components/Dashboard/Export.jsx";
 
 // Icons
-import ShowChartIcon from "@mui/icons-material/ShowChart";
-import OpacityIcon from "@mui/icons-material/Opacity";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeviceThermostatIcon from "@mui/icons-material/DeviceThermostat";
-import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
-import TimelineIcon from '@mui/icons-material/Timeline';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import OpacityIcon from "@mui/icons-material/Opacity";
+import ShowChartIcon from "@mui/icons-material/ShowChart";
+import WarningIcon from "@mui/icons-material/Warning";
+
+// Slide Transition for Snackbar
+function SlideTransition(props) {
+  return <Slide {...props} direction="up" />;
+}
 
 export default function Dashboard() {
+  const [openExport, setOpenExport] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaveTime, setLastSaveTime] = useState(0);
+  const [historyData, setHistoryData] = useState([]);
+  const [userRole, setUserRole] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const SAVE_COOLDOWN = 3000; // 3 seconds cooldown
+
+  // Snackbar handlers
+  const showSnackbar = (message) => {
+    setSnackbarMessage(message);
+    setSnackbarOpen(true);
+  };
+
+  const closeSnackbar = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbarOpen(false);
+  };
+
+  // 📁 Open Export Modal
+  const handleOpenExport = () => {
+    setOpenExport(true);
+  };
+  const [iotData, setIotData] = useState({
+    ph: 0,
+    temperature: 0,
+    turbidity: 0,
+  });
+  const [waterUsage, setWaterUsage] = useState("");
+
+  // Helper functions for export
+  const formatTime = (dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    });
+  };
+
+  const getStatusLabel = (status) => {
+    if (status && status.includes("drinking")) return "Drinking Water";
+    if (status && status.includes("external")) return "External Use";
+    return "Not Safe";
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getIotData();
+      setIotData(data);
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 3000); // realtime
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch history data for export
+  useEffect(() => {
+    const fetchHistoryData = async () => {
+      try {
+        const data = await getHistory();
+        setHistoryData(data);
+      } catch (error) {
+        console.error("Failed to fetch history data:", error);
+      }
+    };
+
+    fetchHistoryData();
+  }, []);
+
+  // Safety standards
+  const PH_GOOD_MIN = 6.5;
+  const PH_GOOD_MAX = 8.5;
+
+  const TURBIDITY_GOOD_MAX = 5; // NTU
+
+  const TEMP_GOOD_MIN = 20; // °C
+  const TEMP_GOOD_MAX = 30;
+
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case "Great":
+        return {
+          status: "Great",
+          color: "#EAFBF0", // green
+          iconColor: "#22C55E",
+        };
+      default:
+        return {
+          status: "Bad",
+          color: "#FEE2E2", // red
+          iconColor: "#EF4444",
+        };
+    }
+  };
+
+  // PH status
+  const phStatus =
+    iotData.ph >= PH_GOOD_MIN && iotData.ph <= PH_GOOD_MAX ? "Great" : "Bad";
+
+  // Turbidity status
+  const turbidityStatus =
+    iotData.turbidity <= TURBIDITY_GOOD_MAX ? "Great" : "Bad";
+
+  // Temperature status
+  const tempStatus =
+    iotData.temperature >= TEMP_GOOD_MIN && iotData.temperature <= TEMP_GOOD_MAX
+      ? "Great"
+      : "Bad";
+
   const cards = [
     {
       title: "PH LEVEL",
-      value: "7.2",
-      status: "Good",
-      color: "#EAFBF0",
-      icon: <ShowChartIcon sx={{ color: "#22C55E" }} />,
+      value: iotData.ph,
+      ...getStatusStyle(phStatus),
+      icon: (
+        <ShowChartIcon sx={{ color: getStatusStyle(phStatus).iconColor }} />
+      ),
     },
     {
       title: "TURBIDITY",
-      value: "1.5",
+      value: iotData.turbidity,
       unit: "NTU",
-      status: "Good",
-      color: "#EAFBF0",
-      icon: <OpacityIcon sx={{ color: "#22C55E" }} />,
+      ...getStatusStyle(turbidityStatus),
+      icon: (
+        <OpacityIcon
+          sx={{ color: getStatusStyle(turbidityStatus).iconColor }}
+        />
+      ),
     },
     {
       title: "TEMPERATURE",
-      value: "24",
+      value: iotData.temperature,
       unit: "°C",
-      status: "Good",
-      color: "#EAFBF0",
-      icon: <DeviceThermostatIcon sx={{ color: "#22C55E" }} />,
-    },
-    {
-      title: "CONDUCTIVITY",
-      value: "450",
-      unit: "µS",
-      status: "Warning",
-      color: "#FFF7E6",
-      icon: <ElectricBoltIcon sx={{ color: "#F59E0B" }} />,
+      ...getStatusStyle(tempStatus),
+      icon: (
+        <DeviceThermostatIcon
+          sx={{ color: getStatusStyle(tempStatus).iconColor }}
+        />
+      ),
     },
   ];
+
+  // Update water usage whenever statuses change
+  useEffect(() => {
+    if (
+      phStatus === "Bad" ||
+      turbidityStatus === "Bad" ||
+      tempStatus === "Bad"
+    ) {
+      setWaterUsage("Water is safe for external use.");
+    } else {
+      setWaterUsage("Water is safe for drinking.");
+    }
+  }, [phStatus, turbidityStatus, tempStatus]);
+
+  const handleSaveData = async () => {
+    const now = Date.now();
+
+    // Check if cooldown is active
+    if (now - lastSaveTime < SAVE_COOLDOWN) {
+      const remainingTime = Math.ceil(
+        (SAVE_COOLDOWN - (now - lastSaveTime)) / 1000
+      );
+      setSnackbarMessage(
+        `⏳ Please wait ${remainingTime}s before saving again`
+      );
+      setSnackbarOpen(true);
+      return;
+    }
+
+    // Prevent multiple simultaneous saves
+    if (isSaving) {
+      setSnackbarMessage("⏳ Save in progress...");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await saveHistory({
+        ph_level: iotData.ph,
+        turbidity: iotData.turbidity,
+        temperature: iotData.temperature,
+        water_status: waterUsage,
+      });
+
+      setLastSaveTime(Date.now());
+      setSnackbarMessage("✅ Water quality data saved successfully!");
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error(error);
+      setSnackbarMessage("❌ Failed to save data");
+      setSnackbarOpen(true);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const exportAllHistoryCSV = () => {
+    if (historyData.length === 0) return;
+
+    const headers = [
+      "Date",
+      "Time",
+      "pH Level",
+      "Turbidity",
+      "Temperature",
+      "Status",
+    ];
+
+    const rows = historyData.map((row) => [
+      dayjs(row.recorded_at).format("YYYY-MM-DD"),
+      formatTime(row.recorded_at),
+      row.ph_level,
+      row.turbidity,
+      row.temperature,
+      getStatusLabel(row.water_status),
+    ]);
+
+    const csvContent =
+      headers.join(",") + "\n" + rows.map((r) => r.join(",")).join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Records.csv";
+    link.click();
+  };
+
+  const exportAllHistoryExcel = () => {
+    if (historyData.length === 0) return;
+
+    const data = historyData.map((row) => ({
+      Date: dayjs(row.recorded_at).format("YYYY-MM-DD"),
+      Time: formatTime(row.recorded_at),
+      "pH Level": row.ph_level,
+      Turbidity: row.turbidity,
+      Temperature: row.temperature,
+      Status: getStatusLabel(row.water_status),
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "All History");
+
+    XLSX.writeFile(workbook, "Records.xlsx");
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       <Box
@@ -91,7 +322,19 @@ export default function Dashboard() {
             Live monitoring from Station A-1
           </Typography>
         </Box>
-        <Button variant="outlined" sx={{borderRadius:2}}>Export Data</Button>
+        <Button
+          variant="outlined"
+          sx={{ 
+            borderRadius: 2,
+            height: { xs: 40, sm: 40 },
+            width: { xs: 170, sm: 150 },
+            minWidth: { xs: 45, sm: 50 },
+            fontSize: { xs: 12, sm: 16 },
+          }}
+          onClick={handleOpenExport}
+        >
+          Export Data
+        </Button>
       </Box>
       <Box
         sx={{
@@ -106,8 +349,10 @@ export default function Dashboard() {
           <Card
             key={index}
             sx={{
-              flex: "1 1 240px",
-              maxWidth: 307,
+              flex: "1 1 calc(33.333% - 24px)",
+            minWidth: 280,
+            maxWidth: { xs: 350, md: "none" }, // Responsive maxWidth
+            width: "100%", 
               borderRadius: 3,
               backgroundColor: card.color,
               boxShadow: "0px 4px 10px rgba(0,0,0,0.08)",
@@ -146,7 +391,11 @@ export default function Dashboard() {
               </Stack>
 
               {/* Value */}
-              <Typography fontSize={32} fontWeight="bold" sx={{color:"black"}}>
+              <Typography
+                fontSize={32}
+                fontWeight="bold"
+                sx={{ color: "black" }}
+              >
                 {card.value}
                 <Typography component="span" fontSize={14} ml={0.5}>
                   {card.unit}
@@ -163,7 +412,28 @@ export default function Dashboard() {
                 <Chip
                   label={card.status}
                   size="small"
-                  color={card.status === "Good" ? "success" : "warning"}
+                  sx={{
+                    backgroundColor:
+                      card.status === "Great"
+                        ? "#EAFBF0"
+                        : card.status === "Good"
+                          ? "#FFF7ED"
+                          : "#FEE2E2",
+                    borderColor:
+                      card.status === "Great"
+                        ? "#22C55E"
+                        : card.status === "Good"
+                          ? "#F59E0B"
+                          : "#EF4444",
+                    color:
+                      card.status === "Great"
+                        ? "#22C55E"
+                        : card.status === "Good"
+                          ? "#F59E0B"
+                          : "#EF4444",
+                    fontWeight: "bold",
+                    borderRadius: 5,
+                  }}
                   variant="outlined"
                 />
                 <Typography fontSize={12} color="gray">
@@ -176,299 +446,206 @@ export default function Dashboard() {
       </Box>
       {/* IOT Info */}
       <Box
-  sx={{
-    display: "flex",
-    gap: 3,
-    flexWrap: "wrap",
-    justifyContent: "center",
-    mt: 3,
-    flexDirection: { xs: "column", md: "row" },
-  }}
->
-  <Paper
-    sx={{
-      p: { xs: 2, md: 3 },
-      mt: 3,
-      borderRadius: 5,
-      height: { xs: 400, md: 500 },
-      minHeight: { xs: 380, md: 500 },
-      width: { xs: "100%", md: "65%" },
-    }}
-  >
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: { xs: "flex-start", md: "center" },
-        mb: 2,
-        flexDirection: { xs: "column", md: "row" },
-        gap: { xs: 2, md: 0 },
-      }}
-    >
-      <Typography 
-        variant="h6" 
-        sx={{ 
-          fontWeight: "bold", 
-          mb: { xs: 1, md: 2 },
-          fontSize: { xs: "1.1rem", md: "1.25rem" }
-        }}
-      >
-        Water Quality Trends
-      </Typography>
-      <FormControl 
-        size="small" 
-        sx={{ 
-          width: { xs: "100%", sm: 290, lg: 180 },
-          mt: { xs: 1, md: 0 }
-        }}
-      >
-        <InputLabel>Sort</InputLabel>
-        <Select label="Sort">
-          <MenuItem value="thism">This Month</MenuItem>
-          <MenuItem value="this7w">This Week</MenuItem>
-          <MenuItem value="last24h">Last 24 Hours</MenuItem>
-        </Select>
-      </FormControl>
-    </Box>
-    {/* Add your chart/content here */}
-    <Box sx={{ 
-      height: { xs: "auto", sm: 250, md: 350 }, 
-      minHeight: { xs: 250, sm: 250, md: 350 },
-      display: "flex", 
-      alignItems: "center", 
-      justifyContent: "center",
-      bgcolor: "gray",
-      borderRadius: 3,
-      p: { xs: 1.5, sm: 2 },
-      width: "100%",
-      overflow: "hidden",
-      boxSizing: "border-box"
-    }}>
-      <Typography 
-        color="text.secondary"
         sx={{
-          fontSize: { xs: "0.875rem", sm: "1rem" },
-          textAlign: "center"
-        }}
-      >
-        Chart/Graph Area
-      </Typography>
-    </Box>
-  </Paper>
-  
-  <Paper
-    sx={{
-      p: { xs: 2, md: 3 },
-      mt: { xs: 0, md: 3 },
-      borderRadius: 5,
-      height: { xs: "auto", md: 500 },
-      minHeight: { xs: 350, md: 500 },
-      width: { xs: "100%", md: "31%" },
-      bgcolor: "indigo",
-    }}
-  >
-    <Typography 
-      variant="h6" 
-      sx={{ 
-        fontWeight: "bold", 
-        mb: 3, 
-        color: "white",
-        fontSize: { xs: "1.1rem", md: "1.25rem" }
-      }}
-    >
-      System Status
-    </Typography>
-    
-    {/* First status item */}
-    <Box sx={{ 
-      display: "flex", 
-      gap: 2, 
-      alignItems: "flex-start", 
-      mb: 3,
-      flexDirection: { xs: "row", sm: "row" }
-    }}>
-      <Paper
-        sx={{
-          p: { xs: 1, md: 1.5 },
-          bgcolor: "gray",
-          color: "white",
-          borderRadius: 100,
           display: "flex",
-          alignItems: "center",
+          gap: 3,
+          flexWrap: "wrap",
           justifyContent: "center",
-          minWidth: { xs: 45, md: 50 },
-          height: { xs: 45, md: 50 },
-          fontWeight: "bold",
-          fontSize: { xs: 18, md: 20 },
-          flexShrink: 0,
+          mt: 3,
+          flexDirection: { xs: "column", md: "row" },
         }}
       >
-        <TimelineIcon fontSize={window.innerWidth < 600 ? "small" : "medium"} />
-      </Paper>
-      <Box sx={{ flex: 1 }}>
-        <Typography 
-          sx={{ 
-            fontWeight: "bold", 
-            color: "violet",
-            fontSize: { xs: "0.95rem", md: "1rem" }
+        <Paper
+          sx={{
+            p: { xs: 3, md: 3 },
+            mt: 3,
+            borderRadius: 3,
+            height: { xs: 400, md: 500 },
+            minHeight: { xs: 380, md: 500 },
+            width: { xs: "100%", md: "100%" },
           }}
         >
-          Filteration System
-        </Typography>
-        <Typography 
-          variant="body2" 
-          sx={{ 
-            fontWeight: "bold", 
-            color: "white",
-            fontSize: { xs: "0.85rem", md: "0.875rem" }
-          }}
-        >
-          Active & Clean
-        </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: { xs: "flex-start", md: "center" },
+              mb: 2,
+              flexDirection: { xs: "column", md: "row" },
+              gap: { xs: 2, md: 0 },
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: "bold",
+                mb: { xs: 1, md: 2 },
+                fontSize: { xs: "1.1rem", md: "1.25rem" },
+              }}
+            >
+              Water Quality Analysis
+            </Typography>
+            <Button
+              color="primary"
+              variant="contained"
+              onClick={handleSaveData}
+              disabled={isSaving}
+              sx={{ 
+                borderRadius: 1,
+                height: { xs: 35, sm: 40 },
+                width: { xs: '100%', sm: 150 },
+                fontSize: { xs: 12, sm: 16 }, 
+              }}
+            >
+              {isSaving ? "Saving..." : "Save Data"}
+            </Button>
+          </Box>
+          {/* Add your chart/content here */}
+          <Box
+            sx={{
+              height: { xs: "auto", sm: 250, md: 350 },
+              minHeight: { xs: "auto", sm: 250, md: 350 },
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: waterUsage.includes("drinking") ? "#E8F5E9" : "#FFF3E0",
+              borderRadius: 3,
+              p: { xs: 1.5, sm: 3 },
+              width: "100%",
+              overflow: "auto",
+              boxSizing: "border-box",
+              border: `2px solid ${waterUsage.includes("drinking") ? "#4CAF50" : "#FF9800"}`,
+              position: "relative",
+            }}
+          >
+            <Box sx={{ textAlign: "center" }}>
+              {waterUsage.includes("drinking") ? (
+                <CheckCircleIcon
+                  sx={{
+                    fontSize: 60,
+                    color: "#4CAF50",
+                    mb: 2,
+                  }}
+                />
+              ) : (
+                <WarningIcon
+                  sx={{
+                    fontSize: 60,
+                    color: "#FF9800",
+                    mb: 2,
+                  }}
+                />
+              )}
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: "bold",
+                  color: waterUsage.includes("drinking")
+                    ? "#2E7D32"
+                    : "#E65100",
+                  mb: 1,
+                }}
+              >
+                {waterUsage.includes("drinking")
+                  ? "Safe for Drinking"
+                  : "Safe for External Use"}
+              </Typography>
+              <Typography
+                color="text.secondary"
+                sx={{
+                  fontSize: { xs: "0.875rem", sm: "1rem" },
+                  mb: 2,
+                }}
+              >
+                {waterUsage}
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 2,
+                  justifyContent: "center",
+                  flexWrap: "wrap",
+                  mt: 3,
+                }}
+              >
+                <Box sx={{ textAlign: "center" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "text.secondary", mb: 0.5 }}
+                  >
+                    pH Level
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: "1.25rem",
+                      fontWeight: "bold",
+                      color: phStatus === "Great" ? "#22C55E" : "#EF4444",
+                    }}
+                  >
+                    {iotData.ph}
+                  </Typography>
+                </Box>
+                <Box sx={{ textAlign: "center" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "text.secondary", mb: 0.5 }}
+                  >
+                    Turbidity
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: "1.25rem",
+                      fontWeight: "bold",
+                      color:
+                        turbidityStatus === "Great" ? "#22C55E" : "#EF4444",
+                    }}
+                  >
+                    {iotData.turbidity} NTU
+                  </Typography>
+                </Box>
+                <Box sx={{ textAlign: "center" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "text.secondary", mb: 0.5 }}
+                  >
+                    Temperature
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: "1.25rem",
+                      fontWeight: "bold",
+                      color: tempStatus === "Great" ? "#22C55E" : "#EF4444",
+                    }}
+                  >
+                    {iotData.temperature}°C
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        </Paper>
       </Box>
-    </Box>
-    
-    {/* Second status item */}
-    <Box sx={{ 
-      display: "flex", 
-      gap: 2, 
-      alignItems: "flex-start", 
-      mb: 3,
-      flexDirection: { xs: "row", sm: "row" }
-    }}>
-      <Paper
-        sx={{
-          p: { xs: 1, md: 1.5 },
-          bgcolor: "gray",
-          color: "white",
-          borderRadius: 100,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minWidth: { xs: 45, md: 50 },
-          height: { xs: 45, md: 50 },
-          fontWeight: "bold",
-          fontSize: { xs: 18, md: 20 },
-          flexShrink: 0,
-        }}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={closeSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        TransitionComponent={SlideTransition}
       >
-        <AccessTimeIcon fontSize={window.innerWidth < 600 ? "small" : "medium"} />
-      </Paper>
-      <Box sx={{ flex: 1 }}>
-        <Typography 
-          sx={{ 
-            fontWeight: "bold", 
-            color: "violet",
-            fontSize: { xs: "0.95rem", md: "1rem" }
-          }}
+        <Alert
+          onClose={closeSnackbar}
+          severity={snackbarMessage.includes("❌") ? "error" : "success"}
+          sx={{ width: "100%" }}
         >
-          Sensor Network
-        </Typography>
-        <Typography 
-          variant="body2" 
-          sx={{ 
-            fontWeight: "bold", 
-            color: "white",
-            fontSize: { xs: "0.85rem", md: "0.875rem" }
-          }}
-        >
-          Operational
-        </Typography>
-      </Box>
-    </Box>
-    
-    <Divider sx={{ 
-      border: 1, 
-      mt: 3, 
-      mb: 3, 
-      color: '#EAEAEA',
-      opacity: 0.3 
-    }} />
-    
-    <Typography 
-      sx={{ 
-        fontWeight: "bold", 
-        color: "violet",
-        fontSize: { xs: "1rem", md: "1.1rem" },
-        mb: 2
-      }}
-    >
-      Filter Health
-    </Typography>
-    
-    {/* Filter Health Visualization */}
-    <Box sx={{ 
-      display: "flex", 
-      flexDirection: "column",
-      gap: 2,
-      mb: 2
-    }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography 
-          variant="body2" 
-          sx={{ 
-            color: "rgba(255, 255, 255, 0.8)",
-            fontSize: { xs: "0.8rem", md: "0.875rem" }
-          }}
-        >
-          Efficiency
-        </Typography>
-        <Typography 
-          variant="body2" 
-          sx={{ 
-            fontWeight: "bold", 
-            color: "white",
-            fontSize: { xs: "0.8rem", md: "0.875rem" }
-          }}
-        >
-          92%
-        </Typography>
-      </Box>
-      <Box sx={{ 
-        width: "100%", 
-        height: 8, 
-        bgcolor: "rgba(255, 255, 255, 0.1)", 
-        borderRadius: 4,
-        overflow: "hidden"
-      }}>
-        <Box sx={{ 
-          width: "92%", 
-          height: "100%", 
-          bgcolor: "violet",
-          borderRadius: 4
-        }} />
-      </Box>
-    </Box>
-    
-    <Box sx={{ 
-      display: "flex", 
-      flexDirection: "column",
-      gap: 2
-    }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography 
-          variant="body2" 
-          sx={{ 
-            color: "rgba(255, 255, 255, 0.8)",
-            fontSize: { xs: "0.8rem", md: "0.875rem" }
-          }}
-        >
-          Last Maintenance
-        </Typography>
-        <Typography 
-          variant="body2" 
-          sx={{ 
-            fontWeight: "bold", 
-            color: "white",
-            fontSize: { xs: "0.8rem", md: "0.875rem" }
-          }}
-        >
-          15 days ago
-        </Typography>
-      </Box>
-    </Box>
-  </Paper>
-</Box>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+      <Export
+        open={openExport}
+        handleClose={() => setOpenExport(false)}
+        onExportCSV={exportAllHistoryCSV}
+        onExportExcel={exportAllHistoryExcel}
+      />
     </Box>
   );
 }

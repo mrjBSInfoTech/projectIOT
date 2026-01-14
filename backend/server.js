@@ -6,6 +6,9 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { fileURLToPath } from 'url';
 import authRoutes from "./routes/auth.js";
+import userRoutes from "./routes/user.js";  
+import iotRoutes from "./routes/iot.js";
+import historyRoutes from "./routes/history.js";
 import db from "./database/db.js";
 
 dotenv.config();
@@ -29,6 +32,9 @@ app.get("/", (req, res) => {
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);  
+app.use("/api/iot", iotRoutes);
+app.use("/api/history", historyRoutes);
 
 // Handle 404 (unknown routes)
 app.use((req, res) => {

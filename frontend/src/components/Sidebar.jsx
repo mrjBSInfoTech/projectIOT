@@ -20,9 +20,10 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import HistoryIcon from "@mui/icons-material/History";
+import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 import FolderIcon from "@mui/icons-material/Folder";
+import PersonIcon from '@mui/icons-material/Person';
 import PlayLessonIcon from "@mui/icons-material/PlayLesson";
 import ThermostatIcon from "@mui/icons-material/Thermostat";
 import WaterDropIcon from "@mui/icons-material/WaterDrop";
@@ -88,6 +89,13 @@ export default function DashboardLayout({ children }) {
     navigate: (path) => navigate(path),
   };
 
+  const getInitials = (name) => {
+    if (!name) return "";
+    const names = name.split(" ");
+    const initials = names.map((n) => n.charAt(0).toUpperCase()).join("");
+    return initials;
+  }
+
   const handleLogout = () => {
     // Clear all stored data
     localStorage.removeItem("token");
@@ -103,6 +111,9 @@ export default function DashboardLayout({ children }) {
     };
   };
 
+  // Check if current user is admin
+  const isAdmin = role === 'Administrator';
+
   // Sidebar menu items
   const navigation = [
     {
@@ -113,9 +124,9 @@ export default function DashboardLayout({ children }) {
     },
     { kind: "divider" },
     {
-      segment: "guides",
-      title: "Guides",
-      icon: <MenuBookIcon />,
+      segment: "information",
+      title: "Information",
+      icon: <InfoOutlineIcon />,
       children: [
         {
           segment: "phLevel",
@@ -132,11 +143,6 @@ export default function DashboardLayout({ children }) {
           title: "Temperature",
           icon: <ThermostatIcon />,
         },
-        {
-          segment: "conductivity",
-          title: "Conductivity",
-          icon: <ElectricBoltIcon />,
-        },
       ],
     },
     { kind: "divider" },
@@ -146,6 +152,15 @@ export default function DashboardLayout({ children }) {
       icon: <DashboardIcon />,
       pattern: "/dashboard",
     },
+    ...(isAdmin ? [
+      { kind: "divider" },
+      {   
+        segment: "account",
+        title: "Account",
+        icon: <PersonIcon />,
+        pattern: "/account",
+      },
+    ] : []),
     { kind: "divider" },
     {
       segment: "history",
@@ -183,15 +198,16 @@ export default function DashboardLayout({ children }) {
       }}
     >
       <Stack direction="row" spacing={1.5} alignItems="center">
-        <Avatar
-          src="https://mui.com/static/images/avatar/1.jpg"
-          alt="John Doe"
-          sx={{ width: 40, height: 40 }}
-        />
+        <Avatar sx={{ width: 40, height: 40, background: `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`, }}>
+          {getInitials(user)}
+        </Avatar>
         {!mini && (
           <Stack direction="column">
             <Typography variant="body2" sx={{ fontWeight: 500 }}>
               User: {user}
+            </Typography>
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+              Role: {role}
             </Typography>
           </Stack>
         )}

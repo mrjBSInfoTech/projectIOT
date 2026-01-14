@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import Sidebar from "./components/Sidebar";
+import Account from "./pages/Account";
 import About from "./pages/About";
 import Dashboard from "./pages/Dashboard";
 import Guide from "./pages/Guide";
@@ -33,90 +34,121 @@ function App() {
           <Route
             path="/guide"
             element={
-              <Sidebar>
-                <Guide />
-              </Sidebar>
+              <ProtectedRoute>
+                <Sidebar>
+                  <Guide />
+                </Sidebar>
+              </ProtectedRoute>
             }
           />
           <Route
-            path="/guides/phLevel"
+            path="/information/phLevel"
             element={
-              <Sidebar>
-                <PHLevel />
-              </Sidebar>
+              <ProtectedRoute>
+                <Sidebar>
+                  <PHLevel />
+                </Sidebar>
+              </ProtectedRoute>
             }
           />
           <Route
-            path="/guides/temperature"
+            path="/information/temperature"
             element={
-              <Sidebar>
-                <Temperature />
-              </Sidebar>
+              <ProtectedRoute>
+                <Sidebar>
+                  <Temperature />
+                </Sidebar>
+              </ProtectedRoute>
             }
           />
           <Route
-            path="/guides/conductivity"
+            path="/information/conductivity"
             element={
-              <Sidebar>
-                <Conductivity />
-              </Sidebar>
+              <ProtectedRoute>
+                <Sidebar>
+                  <Conductivity />
+                </Sidebar>
+              </ProtectedRoute>
             }
           />
           <Route
-            path="/guides/turbidity"
+            path="/information/turbidity"
             element={
-              <Sidebar>
-                <Turbidity />
-              </Sidebar>
+              <ProtectedRoute>
+                <Sidebar>
+                  <Turbidity />
+                </Sidebar>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/guides/healthInfo"
             element={
-              <Sidebar>
-                <HealthInfo />
-              </Sidebar>
+              <ProtectedRoute>
+                <Sidebar>
+                  <HealthInfo />
+                </Sidebar>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/guides/waterInfo"
             element={
-              <Sidebar>
-                <WaterInfo />
-              </Sidebar>
+              <ProtectedRoute>
+                <Sidebar>
+                  <WaterInfo />
+                </Sidebar>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/guides/about"
             element={
-              <Sidebar>
-                <About />
-              </Sidebar>
+              <ProtectedRoute>
+                <Sidebar>
+                  <About />
+                </Sidebar>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/dashboard"
             element={
-              <Sidebar>
-                <Dashboard />
-              </Sidebar>
+              <ProtectedRoute>
+                <Sidebar>
+                  <Dashboard />
+                </Sidebar>
+              </ProtectedRoute>
             }
           />
-          
+          <Route
+            path="/account"
+            element={
+              <ProtectedRoute>
+                <Sidebar>
+                  <Account />
+                </Sidebar>
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/history"
             element={
-              <Sidebar>
-                <History />
-              </Sidebar>
+              <ProtectedRoute>
+                <Sidebar>
+                  <History />
+                </Sidebar>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/about"
             element={
-              <Sidebar>
-                <About />
-              </Sidebar>
+              <ProtectedRoute>
+                <Sidebar>
+                  <About />
+                </Sidebar>
+              </ProtectedRoute>
             }
           />
         </Routes>
