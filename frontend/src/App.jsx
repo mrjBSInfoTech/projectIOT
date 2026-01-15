@@ -82,7 +82,7 @@ function App() {
             }
           />
           <Route
-            path="/guides/healthInfo"
+            path="/information/healthInfo"
             element={
               <ProtectedRoute>
                 <Sidebar>
@@ -92,7 +92,7 @@ function App() {
             }
           />
           <Route
-            path="/guides/waterInfo"
+            path="/information/waterInfo"
             element={
               <ProtectedRoute>
                 <Sidebar>

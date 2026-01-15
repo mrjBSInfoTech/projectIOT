@@ -19,6 +19,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import HistoryIcon from "@mui/icons-material/History";
 import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
 import MenuBookIcon from "@mui/icons-material/MenuBook";
@@ -27,6 +28,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import PlayLessonIcon from "@mui/icons-material/PlayLesson";
 import ThermostatIcon from "@mui/icons-material/Thermostat";
 import WaterDropIcon from "@mui/icons-material/WaterDrop";
+import WaterIcon from '@mui/icons-material/Water';
 
 export const lightTheme = createTheme({
   palette: {
@@ -142,6 +144,16 @@ export default function DashboardLayout({ children }) {
           segment: "temperature",
           title: "Temperature",
           icon: <ThermostatIcon />,
+        },
+        {
+          segment: "healthInfo",
+          title: "Health Info",
+          icon: <FavoriteIcon />,
+        },
+        {
+          segment: "waterInfo",
+          title: "Water Info",
+          icon: <WaterIcon />,
         },
       ],
     },
